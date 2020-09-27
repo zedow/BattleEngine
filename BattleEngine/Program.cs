@@ -1,6 +1,9 @@
-﻿using System;
+﻿using BattleEngine.ObserverPattern;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Cryptography.X509Certificates;
 
 namespace BattleEngine
@@ -13,13 +16,21 @@ namespace BattleEngine
         WIN,
         LOSE
     }
+
+    public class BattleStatesManager : MyObserver<Character>
+    {
+        public void Update(MyObservable<Character> observed)
+        {
+            
+        }
+    }
     class Program
     {
         static void Main(string[] args)
         {
             // Déclaration du Battle Engine
             BattleEngine Engine = new BattleEngine();
-            UI ui = new UI();
+            BattleStatesManager manager = new BattleStatesManager();
 
             List<Character> battleCharacters = new List<Character>();
 
@@ -30,6 +41,7 @@ namespace BattleEngine
                 HP = 100f,
                 ActionPoints = 8,
             };
+            berserker.Observe(manager);
 
             Foe monster = new Foe
             {
@@ -37,24 +49,15 @@ namespace BattleEngine
                 HP = 35f,
                 ActionPoints = 8
             };
+            monster.Observe(manager);
 
             battleCharacters.Add(berserker);
             battleCharacters.Add(monster);
 
-            string userKey = "";
-
+            // Mise en place d'une compétence de test
             Ability ability1 = new Ability(3, -15f,"Fendoir","Coup d'épée infligeant une terrible blessure");
             berserker.Abilities.Add(ability1);
-
-           
-            // Action d'attaque basique
-            TurnAction action = new TurnAction
-            {
-                Action = berserker.Abilities.ElementAt(0).DoAbility,
-                Source = berserker,
-                Target = monster,
-                ActionName = "Lancer un sort"
-            };
+            monster.Abilities.Add(ability1);
 
             // Booléan définissant si la bataille est en cours ou terminée
             bool battle = true;
@@ -74,94 +77,124 @@ namespace BattleEngine
                     // Si c'est le tour du joueur
                     case BattleStates.PLAYERTURN:
                         Engine.StartTurn(); 
-                        battleCharacters.ForEach(i => ui.Display($"{i.Name} : Points d'action  restant : {i.ActionPoints}, HP restant : {i.HP}"));
+                        battleCharacters.ForEach(i => UI.Display($"{i.Name} : Points d'action  restant : {i.ActionPoints}, HP restant : {i.HP}"));
 
                         // Choix de l'action à effectuer pour le joueur
-                        ui.Display("Quelle action voulez-vous effectuer ?");
-                        ui.Display("Appuyez sur A pour attaquer et Q pour abandonner");
+                        UI.Display("Quelle action voulez-vous effectuer ?");
+                        UI.Display("Appuyez sur A pour attaquer, Q pour abandonner et P pour passer votre tour");
 
+                        // Demande à l'utilisateur d'entrer une valeur tant que a valeur ne correspond pas à une option possible
                         string value = Console.ReadLine();
+                        while(value != "A" && value != "Q" && value != "P")
+                        {
+                            UI.Display("Veuillez indiquer une valeur valide");
+                            value = Console.ReadLine();
+                        }
                         switch (value)
                         {
                             case "A":
 
-                                ui.Display("Quelle compétence voulez-vous utiliser ?");
+                                UI.Display("Quelle compétence voulez-vous utiliser ?");
 
                                 // Affichage de toutes les compétences du personnage et de leur index
                                 for (int i = 0; i < berserker.Abilities.Count; i++)
                                 {
-                                    ui.Display($"{i} : {berserker.Abilities.ElementAt(i).Name}");
+                                    UI.Display($"{i} : {berserker.Abilities.ElementAt(i).Name} | Coûte {berserker.Abilities.ElementAt(i).ActionPoint} points d'action");
                                 }   
                                 
-                                // Initialisation de l'inex à -1
+                                // Initialisation de l'index à 99 (signifiant que l'index est dans l'attente de recevoir une valeur)
                                 int ability_index = 99;
 
                                 // Demande à l'utilisateur d'indiquer l'index de la compétence à utiliser tant qu'il n'est pas renseigné ou tant que l'index renseigné est incorrect
-                                while(ability_index >= berserker.Abilities.Count)
+                                while(ability_index >= berserker.Abilities.Count && ability_index != 100)
                                 {
                                     switch(ability_index)
                                     {
                                         case 99:
-                                            ui.Display("Veuillez renseigner le numéro de la compétence à utiliser");
+                                            UI.Display("Veuillez renseigner le numéro de la compétence à utiliser");
                                             break;
                                         case 98:
-                                            ui.Display("Index incorrect, Veuillez réessayer");
+                                            UI.Display("Index incorrect, Veuillez réessayer");
                                             break;
                                         case 97:
-                                            ui.Display("Points d'action insuffisants pour utiliser cette compétence");
+                                            UI.Display("Points d'action insuffisants pour utiliser cette compétence (entrez 100 pour passer le tour)");
                                             break;
                                     }
                                     string input = Console.ReadLine();
                                     try
                                     {
                                         ability_index = Math.Abs(Int32.Parse(input));
-                                        if (berserker.Abilities.ElementAt(ability_index).ActionPoint > berserker.ActionPoints)
+                                        if (berserker.Abilities.ElementAt(ability_index).ActionPoint > berserker.ActionPoints && ability_index != 100)
                                         {
+                                            // Initialisation de l'index à 97 (signifiant que la compétence choisie n'est pas réalisable)
                                             ability_index = 97;
                                         }
                                     }
                                     catch
                                     {
-                                        ability_index = 98;
+                                        // Initialisation de l'index à 98 (signifiant que l'index choisi n'est pas valide)
+                                        if(ability_index != 100)
+                                        {
+                                            ability_index = 98;
+                                        }
                                     }
                                 }
-                                // Ajoute l'action de la compétence à utiliser aux actions du tour sur l'Engine
-                                TurnAction currentAction = new TurnAction
+                                if(ability_index != 100)
                                 {
-                                    Action = berserker.Abilities.ElementAt(ability_index).DoAbility,
-                                    Source = berserker,
-                                    Target = monster,
-                                    ActionName = $"Utilise le sort {berserker.Abilities.ElementAt(ability_index).Name}"
-                                };
-                                Engine.AppendAction(currentAction);
+                                    // Ajoute l'action de la compétence à utiliser aux actions du tour sur l'Engine
+                                    TurnAction currentAction = new TurnAction
+                                    {
+                                        Action = berserker.Abilities.ElementAt(ability_index).DoAbility,
+                                        Source = berserker,
+                                        Target = monster,
+                                        ActionName = $"Utilise le sort {berserker.Abilities.ElementAt(ability_index).Name}"
+                                    };
+                                    Engine.AppendAction(currentAction);
+                                }
+                                else
+                                {
+                                    UI.Display("Vous passez votre tour");
+                                }
+                                state = BattleStates.ENEMYTURN;
                                 break;
 
                             case "Q":
-                                ui.Display("Vous avez décidé d'abandonner");
+                                UI.Display("Vous avez décidé d'abandonner");
                                 state = BattleStates.LOSE;
+                                break;
+
+                            case "P":
+                                UI.Display("Vous passez votre tour");
+                                state = BattleStates.ENEMYTURN;
                                 break;
                         }
                         Engine.DoTurn();
-                        Engine.GetTurnResults().ToList().ForEach(i => ui.Display(i.DisplayText));
+                        Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
                         break;
 
                     // Si c'est le tour de l'adversaire
                     case BattleStates.ENEMYTURN:
                         Engine.StartTurn();
-                        ui.Display("Tour de l'adversaire");
+                        UI.Display("Tour de l'adversaire");
+                        TurnAction action = monster.DoTurn(berserker);
+                        if(action != null)
+                        {
+                            Engine.AppendAction(action);
+                        }
                         Engine.DoTurn();
-                        Engine.GetTurnResults().ToList().ForEach(i => ui.Display(i.DisplayText));
+                        Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
+                        state = BattleStates.PLAYERTURN;
                         break;
 
                     // Si le joueur a gagné la bataille
                     case BattleStates.WIN:
-                        ui.Display("Vous avez gagné la bataille !");
+                        UI.Display("Vous avez gagné la bataille !");
                         battle = false;
                         break;
 
                     // Si le joueur a perdu la bataille
                     case BattleStates.LOSE:
-                        ui.Display("Vous avez perdu la bataille");
+                        UI.Display("Vous avez perdu la bataille");
                         battle = false;
                         break;
                 }

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace BattleEngine
 {
-    public class Character
+    public class Character : MyObservable<Character>
     {
         public string Name;
         public float HP;
@@ -19,5 +19,9 @@ namespace BattleEngine
             MaxActionPoints = ActionPoints;
         }
 
+        public void Notify()
+        {
+            NotifyObservers();
+        }
     }
 }

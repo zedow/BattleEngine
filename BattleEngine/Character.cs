@@ -11,7 +11,7 @@ namespace BattleEngine
 
         public Character Target;
 
-        protected List<Ability> Abilities;
+        public List<Ability> Abilities;
 
         public Character()
         {

@@ -9,5 +9,12 @@ namespace BattleEngine
         public int ActionPoint;
         public string Name;
         public string Description;
+
+        public Ability(int actionPoint, string name, string description)
+        {
+            ActionPoint = actionPoint;
+            Name = name;
+            Description = description;
+        }
     }
 }

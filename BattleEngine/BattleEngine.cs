@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace BattleEngine
@@ -23,21 +24,12 @@ namespace BattleEngine
 
         public void AppendAction(params TurnAction[] actions)
         {
-           foreach(TurnAction action in actions)
-           {
-                Actions.Add(action);
-           }
+            Actions.AddRange(actions);
         }
 
         public void DoTurn()
         {
-            foreach(TurnAction action in Actions)
-            {
-                foreach(ActionResult result in action.DoAction())
-                {
-                    Results.Add(result);
-                }
-            }
+            Actions.ForEach(i => Results.AddRange( i.DoAction()));
         }
 
         public IEnumerable<ActionResult> GetTurnResults()

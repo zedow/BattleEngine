@@ -19,6 +19,11 @@ namespace BattleEngine
             Observers.Add(observer);
         }
 
+        public void RemoveObserver(MyObserver<T> observer)
+        {
+            Observers.Remove(observer);
+        }
+
         protected void NotifyObservers()
         {
             Observers.ForEach(i => i.Update(this));

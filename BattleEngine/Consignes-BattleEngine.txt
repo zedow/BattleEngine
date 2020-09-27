@@ -1,0 +1,42 @@
+Le but de ce devoir est de créer un jeu de type RPG (Combat au tour par tout)
+Grâce au classes en pièce jointes, vous avez les bases pour pouvoir le créer
+
+Cet exercice est une sorte de Sandbox, il n'y a pas de consigne particulière pour votre projet
+
+-------------------------------------------------------------------------------------------------------
+
+Néanmoins, voici le "Principe" des classes telles que je les imagine (Vous avez tout a fait le droit de refaire votre architecture. Non, en fait, je vous y encourage !)
+
+############# Character #############
+Cette classe définit la base d'un personnage (Save et son Nom)
+
+
+############# PartyCharacter #############
+Cette classe hérite de la classe Character et représente un personnage amical
+
+
+############# Foe ############
+Cette classe hérite de la classe Character et représente un personnage ennemi
+
+
+############# TurnAction #############
+Cette classe représente une action qui va être réalisée.
+Elle possède un nom, une source (Personnage), une cible (Personnage)
+Elle possède une Func<> qui contiendra l'action a réaliser
+Cette Func retourne un IEnumerable<ActionResult>
+
+
+############# ActionResult #############
+Cette classe contient les informations du déroulé d'une TurnAction (Dégats infligés, soignés, sort utilisé ...)
+Modifiez la à loisir !
+
+############# BattleEngine #############
+Cette classe vous permet de démarrer un nouveau tour (Elle vide les actions en cours)
+AppendAction permet d'ajouter une action à réaliser ce tour-ci
+DoTurn va calculer toutes les TurnActions
+GetTurnResults vous permet de récupperer les résultats obtenus pendant le tour
+
+-------------------------------------------------------------------------------------------------------
+
+Par ailleurs, vous trouverez un exemple de pattern Observer dans le dossier "ObserverPattern"
+Utilisez le afin de bien le comprendre si vous voulez ! (Modifiez le pour qu'il s'adapte parfaitement si vous voulez)

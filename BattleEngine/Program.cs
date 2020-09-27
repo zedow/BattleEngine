@@ -94,20 +94,35 @@ namespace BattleEngine
                                 }   
                                 
                                 // Initialisation de l'inex à -1
-                                int ability_index = -1;
+                                int ability_index = 99;
 
                                 // Demande à l'utilisateur d'indiquer l'index de la compétence à utiliser tant qu'il n'est pas renseigné ou tant que l'index renseigné est incorrect
-                                while(ability_index < 0 || ability_index >= berserker.Abilities.Count)
+                                while(ability_index >= berserker.Abilities.Count)
                                 {
-                                    ui.Display(ability_index < 0 ? "Veuillez renseigner le numéro de la compétence à utiliser" : "Index incorrect, Veuillez réessayer");
+                                    switch(ability_index)
+                                    {
+                                        case 99:
+                                            ui.Display("Veuillez renseigner le numéro de la compétence à utiliser");
+                                            break;
+                                        case 98:
+                                            ui.Display("Index incorrect, Veuillez réessayer");
+                                            break;
+                                        case 97:
+                                            ui.Display("Points d'action insuffisants pour utiliser cette compétence");
+                                            break;
+                                    }
                                     string input = Console.ReadLine();
                                     try
                                     {
-                                        ability_index = Int32.Parse(input);
+                                        ability_index = Math.Abs(Int32.Parse(input));
+                                        if (berserker.Abilities.ElementAt(ability_index).ActionPoint > berserker.ActionPoints)
+                                        {
+                                            ability_index = 97;
+                                        }
                                     }
                                     catch
                                     {
-                                        ability_index = 99;
+                                        ability_index = 98;
                                     }
                                 }
                                 // Ajoute l'action de la compétence à utiliser aux actions du tour sur l'Engine

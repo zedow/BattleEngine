@@ -31,7 +31,7 @@ namespace BattleEngine
 
             // Si la valeur est négative, la compétence inflige des dêgats à la cible, si la valeur est positive, la compétence soigne la cible
             results.Add(new ActionResult(this.Value > 0f ? $"Se soignant de {this.Value} Hp" : $"Infligeant {this.Value * -1} sur {target.Name}"));
-            results.Add(new ActionResult($"{source.Name} a perdu {this.ActionPoint} points d'action, {source.ActionPoints} points d'action restant"));
+            results.Add(new ActionResult($"{source.Name} a perdu {this.ActionPoint} points d'action, {source.ActionPoints - this.ActionPoint} points d'action restant"));
 
             // Opération à effectuer sur la cible
             target.HP += this.Value;

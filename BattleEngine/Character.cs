@@ -7,21 +7,17 @@ namespace BattleEngine
     public class Character
     {
         public string Name;
-        public int HP;
-
-        public Character Target;
+        public float HP;
+        public int ActionPoints;
+        public int MaxActionPoints;
 
         public List<Ability> Abilities;
 
         public Character()
         {
             Abilities = new List<Ability>();
-            Target = null;
+            MaxActionPoints = ActionPoints;
         }
 
-        public void DoAbility(Ability ability)
-        {
-            
-        }
     }
 }

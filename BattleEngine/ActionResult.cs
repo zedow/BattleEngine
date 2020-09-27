@@ -7,5 +7,12 @@ namespace BattleEngine
     public class ActionResult
     {
         public string DisplayText;
+
+        public ActionResult(string message)
+        {
+            DisplayText = message;
+        }
+
+        public ActionResult() { }
     }
 }

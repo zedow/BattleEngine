@@ -688,20 +688,27 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\valen\\.nuget\\packages\\": {}
+    "C:\\Users\\valen\\.nuget\\packages\\": {},
+    "D:\\Microsoft\\Xamarin\\NuGet\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\projects\\BattleEngine\\BattleEngine\\BattleEngine.csproj",
+      "projectUniqueName": "D:\\Projets Unity\\BattleEngine\\BattleEngine\\BattleEngine\\BattleEngine.csproj",
       "projectName": "BattleEngine",
-      "projectPath": "D:\\projects\\BattleEngine\\BattleEngine\\BattleEngine.csproj",
+      "projectPath": "D:\\Projets Unity\\BattleEngine\\BattleEngine\\BattleEngine\\BattleEngine.csproj",
       "packagesPath": "C:\\Users\\valen\\.nuget\\packages\\",
-      "outputPath": "D:\\projects\\BattleEngine\\BattleEngine\\obj\\",
+      "outputPath": "D:\\Projets Unity\\BattleEngine\\BattleEngine\\BattleEngine\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "D:\\Microsoft\\Xamarin\\NuGet\\",
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
       "configFilePaths": [
         "C:\\Users\\valen\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
       ],
       "originalTargetFrameworks": [
         "netcoreapp2.1"

@@ -1,0 +1,11 @@
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\bin\Debug\netcoreapp2.1\BattleEngine.deps.json
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\bin\Debug\netcoreapp2.1\BattleEngine.runtimeconfig.json
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\bin\Debug\netcoreapp2.1\BattleEngine.runtimeconfig.dev.json
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\bin\Debug\netcoreapp2.1\BattleEngine.dll
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\bin\Debug\netcoreapp2.1\BattleEngine.pdb
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\obj\Debug\netcoreapp2.1\BattleEngine.csprojAssemblyReference.cache
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\obj\Debug\netcoreapp2.1\BattleEngine.csproj.CoreCompileInputs.cache
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\obj\Debug\netcoreapp2.1\BattleEngine.AssemblyInfoInputs.cache
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\obj\Debug\netcoreapp2.1\BattleEngine.AssemblyInfo.cs
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\obj\Debug\netcoreapp2.1\BattleEngine.dll
+D:\Projets Unity\BattleEngine\BattleEngine\BattleEngine\obj\Debug\netcoreapp2.1\BattleEngine.pdb

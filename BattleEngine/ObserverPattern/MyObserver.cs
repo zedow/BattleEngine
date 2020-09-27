@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ConsoleApp3.ObserverPattern
+namespace BattleEngine.ObserverPattern
 {
     public interface MyObserver<T> where T : MyObservable<T>
     {

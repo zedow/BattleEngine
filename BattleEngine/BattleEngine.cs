@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ConsoleApp3
+namespace BattleEngine
 {
     public class BattleEngine
     {
@@ -23,12 +23,21 @@ namespace ConsoleApp3
 
         public void AppendAction(params TurnAction[] actions)
         {
-            // Codez ici !
+           foreach(TurnAction action in actions)
+           {
+                Actions.Add(action);
+           }
         }
 
         public void DoTurn()
         {
-            // Codez ici !
+            foreach(TurnAction action in Actions)
+            {
+                foreach(ActionResult result in action.DoAction())
+                {
+                    Results.Add(result);
+                }
+            }
         }
 
         public IEnumerable<ActionResult> GetTurnResults()

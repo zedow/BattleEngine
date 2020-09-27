@@ -694,11 +694,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Projets Unity\\BattleSystem\\BattleEngine\\BattleEngine\\BattleEngine.csproj",
+      "projectUniqueName": "D:\\Projets Unity\\BattleEngine\\BattleEngine\\BattleEngine\\BattleEngine.csproj",
       "projectName": "BattleEngine",
-      "projectPath": "D:\\Projets Unity\\BattleSystem\\BattleEngine\\BattleEngine\\BattleEngine.csproj",
+      "projectPath": "D:\\Projets Unity\\BattleEngine\\BattleEngine\\BattleEngine\\BattleEngine.csproj",
       "packagesPath": "C:\\Users\\valen\\.nuget\\packages\\",
-      "outputPath": "D:\\Projets Unity\\BattleSystem\\BattleEngine\\BattleEngine\\obj\\",
+      "outputPath": "D:\\Projets Unity\\BattleEngine\\BattleEngine\\BattleEngine\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

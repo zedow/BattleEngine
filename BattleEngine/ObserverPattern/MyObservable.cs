@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using ConsoleApp3.ObserverPattern;
+using BattleEngine.ObserverPattern;
 
-namespace ConsoleApp3
+namespace BattleEngine
 {
     public class MyObservable<T> where T : MyObservable<T>
     {

@@ -83,10 +83,13 @@ namespace BattleEngine
             // Mise en place des compétences utilisables
             Ability ability1 = new Ability(2, -10f, "Griffure", "Coup de griffes acérées perforant les armures",0);
             Ability ability2 = new Ability(3, -15f,"Fendoir","Coup d'épée infligeant une terrible blessure",0);
+            Ability ability4 = new Ability(8, -30f, "Hachoir", "Coup d'épée infligeant une terrible blessure", 0);
             Ability ability3 = new Ability(5, -25f, "Tourbillon", "Le tourbillon est une technique mortelle de combat",2);
             manager.Character.Abilities.Add(ability2);
             manager.Character.Abilities.Add(ability3);
+
             manager.Monster.Abilities.Add(ability1);
+            manager.Monster.Abilities.Add(ability4);
 
             // Booléan définissant si la bataille est en cours ou terminée
             bool battle = true;
@@ -128,7 +131,7 @@ namespace BattleEngine
                                 // Affichage de toutes les compétences du personnage et de leur index
                                 for (int i = 0; i < manager.Character.Abilities.Count; i++)
                                 {
-                                    UI.Display($"{i} : {manager.Character.Abilities.ElementAt(i).Name} | Coûte {manager.Character.Abilities.ElementAt(i).ActionPoint} points d'action");
+                                    UI.Display($"{i} : {manager.Character.Abilities.ElementAt(i).Name} | Coûte {manager.Character.Abilities.ElementAt(i).ActionPoint} points d'action | Délai avant réutilisation {manager.Character.Abilities.ElementAt(i).currentCooldown} tours");
                                 }   
                                 
                                 // Initialisation de l'index à 99 (signifiant que l'index est dans l'attente de recevoir une valeur)
@@ -140,13 +143,16 @@ namespace BattleEngine
                                     switch(ability_index)
                                     {
                                         case 99:
-                                            UI.Display("Veuillez renseigner le numéro de la compétence à utiliser");
+                                            UI.Display("Veuillez renseigner le numéro de la compétence à utiliser (entrez 100 pour passer le tour)");
                                             break;
                                         case 98:
-                                            UI.Display("Index incorrect, Veuillez réessayer");
+                                            UI.Display("Index incorrect, Veuillez réessayer (entrez 100 pour passer le tour)");
                                             break;
                                         case 97:
                                             UI.Display("Points d'action insuffisants pour utiliser cette compétence (entrez 100 pour passer le tour)");
+                                            break;
+                                        case 96:
+                                            UI.Display("Compétence inutilisable (entrez 100 pour passer le tour)");
                                             break;
                                     }
                                     string input = Console.ReadLine();
@@ -157,6 +163,11 @@ namespace BattleEngine
                                         {
                                             // Initialisation de l'index à 97 (signifiant que la compétence choisie n'est pas réalisable)
                                             ability_index = 97;
+                                        }
+                                        else if(manager.Character.Abilities.ElementAt(ability_index).currentCooldown != 0)
+                                        {
+                                            // Initialisation de l'index à 96 (signifiant que la compétence choisie est en cooldown)
+                                            ability_index = 96;
                                         }
                                     }
                                     catch
@@ -179,6 +190,7 @@ namespace BattleEngine
                                         ActionName = $"Utilise le sort {manager.Character.Abilities.ElementAt(ability_index).Name}"
                                     };
                                     manager.Engine.AppendAction(currentAction);
+                          
                                 }
                                 else
                                 {
@@ -199,7 +211,7 @@ namespace BattleEngine
                         }
                         manager.Engine.DoTurn();
                         manager.Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
-
+                        manager.Character.Abilities.ForEach(i => i.ReduceCd());
                         UI.Seperate();
                         break;
 
@@ -215,8 +227,10 @@ namespace BattleEngine
                         manager.Engine.DoTurn();
                         manager.Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
 
+                        manager.Monster.Abilities.ForEach(i => i.ReduceCd());
+
                         // Redonne 3 points d'action aux personnages participants à la bataille
-                        AddActionsPoint(battleCharacters);
+                        AddActionsPoint(manager.BattleCharacters());
 
                         if (manager.state != BattleStates.LOSE && manager.state != BattleStates.WIN)
                         {

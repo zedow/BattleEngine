@@ -17,6 +17,7 @@ namespace BattleEngine
 
         // Nombre de tours avant réutilisation de la compétence
         public int Cooldown;
+        public int currentCooldown;
 
         public Ability(int actionPoint, float value, string name, string description,int cd)
         {
@@ -25,11 +26,13 @@ namespace BattleEngine
             Name = name;
             Description = description;
             Cooldown = cd;
+            currentCooldown = 0;
         }
 
         // Fonction basée sur le template Action de la classe TurnAction
         public IEnumerable<ActionResult> DoAbility(Character source, Character target, TurnAction action)
         {
+            currentCooldown = Cooldown;
             List<ActionResult> results = new List<ActionResult>();
             // Si le personnage a suffisament de points d'action pour utiliser la compétence
               
@@ -44,6 +47,14 @@ namespace BattleEngine
             
             // Retours des messages contenus dans la liste d'objets ActionResult qui seront affichés par le BattleEngine
             return (results);
+        }
+
+        public void ReduceCd()
+        {
+            if(currentCooldown > 0)
+            {
+                currentCooldown--;
+            }
         }
     }
 }

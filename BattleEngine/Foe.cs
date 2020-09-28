@@ -9,17 +9,21 @@ namespace BattleEngine
     {
         public TurnAction DoTurn(PartyCharacter target)
         {
-            if(this.ActionPoints > this.Abilities.ElementAt(0).ActionPoint)
+            // Utilise la compétence ayant la plus grosse valeur d'attaque avec un coût en point d'action inférieur aux points d'action restant et ayant un cooldown restant de 0
+            Ability ability = this.Abilities.Where(i => (i.Cooldown == 0) && (i.ActionPoint <= this.ActionPoints)).OrderByDescending(i => Math.Abs(i.Value)).FirstOrDefault();
+
+            if(ability != null)
             {
                 TurnAction action = new TurnAction
                 {
-                    Action = this.Abilities.ElementAt(0).DoAbility,
-                    ActionName = "L'adversaire utilise une compétence",
+                    Action = ability.DoAbility,
+                    ActionName = $"L'adversaire utilise la compétence {ability.Name}",
                     Source = this,
                     Target = target
                 };
                 return (action);
             }
+            // Si aucune compétence n'est utilisable
             else
             {
                 UI.Display($"{this.Name} passe son tour !");

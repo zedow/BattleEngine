@@ -17,11 +17,31 @@ namespace BattleEngine
         LOSE
     }
 
-    public class BattleStatesManager : MyObserver<Character>
+    public class BattleManager : MyObserver<Character>
     {
+        public BattleStates state;
+        public PartyCharacter Character;
+        public Foe Monster;
+
+        public BattleEngine Engine = new BattleEngine();
+        public List<Character> BattleCharacters()
+        {
+            return (new List<Character> { Character, Monster });
+        }
         public void Update(MyObservable<Character> observed)
         {
-            
+            Character character = (Character)observed;
+            if(character.CurrentHP <= 0)
+            {
+                if(character == Character)
+                {
+                    state = BattleStates.LOSE;
+                }
+                else
+                {
+                    state = BattleStates.WIN;
+                }
+            }
         }
     }
     class Program
@@ -34,14 +54,13 @@ namespace BattleEngine
         }
         static void Main(string[] args)
         {
-            // Déclaration du Battle Engine et des personnages joueurs
-            BattleEngine Engine = new BattleEngine();
-            BattleStatesManager manager = new BattleStatesManager();
+            // Déclaration du Battle Manager qui surveille l'état des personnages participants à la bataille
+            BattleManager manager = new BattleManager();
+            manager.state = BattleStates.START;
 
             List<Character> battleCharacters = new List<Character>();
 
-            BattleStates state = BattleStates.START;
-            PartyCharacter berserker = new PartyCharacter
+            manager.Character = new PartyCharacter
             {
                 Name = "Geralt of Rivia",
                 HP = 100f,
@@ -50,7 +69,7 @@ namespace BattleEngine
                 MaxActionPoints = 8,
             };
 
-            Foe monster = new Foe
+            manager.Monster = new Foe
             {
                 Name = "Noyeur",
                 HP = 35f,
@@ -58,18 +77,16 @@ namespace BattleEngine
                 ActionPoints = 8,
                 MaxActionPoints = 8,
             };
-       
-            battleCharacters.Add(berserker);
-            battleCharacters.Add(monster);
-            battleCharacters.ForEach(i => i.Observe(manager));
+
+            manager.BattleCharacters().ForEach(i => i.Observe(manager));
 
             // Mise en place des compétences utilisables
-            Ability ability1 = new Ability(2, -10f, "Griffure", "Coup de griffes acérées perforant les armures");
-            Ability ability2 = new Ability(3, -15f,"Fendoir","Coup d'épée infligeant une terrible blessure");
-            Ability ability3 = new Ability(5, -25f, "Tourbillon", "Le tourbillon est une technique mortelle de combat");
-            berserker.Abilities.Add(ability2);
-            berserker.Abilities.Add(ability3);
-            monster.Abilities.Add(ability1);
+            Ability ability1 = new Ability(2, -10f, "Griffure", "Coup de griffes acérées perforant les armures",0);
+            Ability ability2 = new Ability(3, -15f,"Fendoir","Coup d'épée infligeant une terrible blessure",0);
+            Ability ability3 = new Ability(5, -25f, "Tourbillon", "Le tourbillon est une technique mortelle de combat",2);
+            manager.Character.Abilities.Add(ability2);
+            manager.Character.Abilities.Add(ability3);
+            manager.Monster.Abilities.Add(ability1);
 
             // Booléan définissant si la bataille est en cours ou terminée
             bool battle = true;
@@ -78,17 +95,17 @@ namespace BattleEngine
             while(battle)
             {
                 // Comportement de l'application selon l'état de la bataille
-                switch (state)
+                switch (manager.state)
                 {
                     // Si la bataille commence
                     case BattleStates.START:
                         Console.WriteLine("La bataille commence");
-                        state = BattleStates.PLAYERTURN;
+                        manager.state = BattleStates.PLAYERTURN;
                         break;
 
                     // Si c'est le tour du joueur
                     case BattleStates.PLAYERTURN:
-                        Engine.StartTurn(); 
+                        manager.Engine.StartTurn(); 
                         battleCharacters.ForEach(i => UI.Display($"{i.Name} : Points d'action  restant : {i.ActionPoints}, HP restant : {i.CurrentHP} sur { i.HP }"));
                         UI.Seperate();
                         // Choix de l'action à effectuer pour le joueur
@@ -109,16 +126,16 @@ namespace BattleEngine
                                 UI.Display("Quelle compétence voulez-vous utiliser ?");
 
                                 // Affichage de toutes les compétences du personnage et de leur index
-                                for (int i = 0; i < berserker.Abilities.Count; i++)
+                                for (int i = 0; i < manager.Character.Abilities.Count; i++)
                                 {
-                                    UI.Display($"{i} : {berserker.Abilities.ElementAt(i).Name} | Coûte {berserker.Abilities.ElementAt(i).ActionPoint} points d'action");
+                                    UI.Display($"{i} : {manager.Character.Abilities.ElementAt(i).Name} | Coûte {manager.Character.Abilities.ElementAt(i).ActionPoint} points d'action");
                                 }   
                                 
                                 // Initialisation de l'index à 99 (signifiant que l'index est dans l'attente de recevoir une valeur)
                                 int ability_index = 99;
 
                                 // Demande à l'utilisateur d'indiquer l'index de la compétence à utiliser tant qu'il n'est pas renseigné ou tant que l'index renseigné est incorrect
-                                while(ability_index >= berserker.Abilities.Count && ability_index != 100)
+                                while(ability_index >= manager.Character.Abilities.Count && ability_index != 100)
                                 {
                                     switch(ability_index)
                                     {
@@ -136,7 +153,7 @@ namespace BattleEngine
                                     try
                                     {
                                         ability_index = Math.Abs(Int32.Parse(input));
-                                        if (berserker.Abilities.ElementAt(ability_index).ActionPoint > berserker.ActionPoints && ability_index != 100)
+                                        if (manager.Character.Abilities.ElementAt(ability_index).ActionPoint > manager.Character.ActionPoints && ability_index != 100)
                                         {
                                             // Initialisation de l'index à 97 (signifiant que la compétence choisie n'est pas réalisable)
                                             ability_index = 97;
@@ -156,52 +173,55 @@ namespace BattleEngine
                                     // Ajoute l'action de la compétence à utiliser aux actions du tour sur l'Engine
                                     TurnAction currentAction = new TurnAction
                                     {
-                                        Action = berserker.Abilities.ElementAt(ability_index).DoAbility,
-                                        Source = berserker,
-                                        Target = monster,
-                                        ActionName = $"Utilise le sort {berserker.Abilities.ElementAt(ability_index).Name}"
+                                        Action = manager.Character.Abilities.ElementAt(ability_index).DoAbility,
+                                        Source = manager.Character,
+                                        Target = manager.Monster,
+                                        ActionName = $"Utilise le sort {manager.Character.Abilities.ElementAt(ability_index).Name}"
                                     };
-                                    Engine.AppendAction(currentAction);
+                                    manager.Engine.AppendAction(currentAction);
                                 }
                                 else
                                 {
                                     UI.Display("Vous passez votre tour");
                                 }
-                                state = BattleStates.ENEMYTURN;
+                                manager.state = BattleStates.ENEMYTURN;
                                 break;
 
                             case "Q":
                                 UI.Display("Vous avez décidé d'abandonner");
-                                state = BattleStates.LOSE;
+                                manager.state = BattleStates.LOSE;
                                 break;
 
                             case "P":
                                 UI.Display("Vous passez votre tour");
-                                state = BattleStates.ENEMYTURN;
+                                manager.state = BattleStates.ENEMYTURN;
                                 break;
                         }
-                        Engine.DoTurn();
-                        Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
+                        manager.Engine.DoTurn();
+                        manager.Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
 
                         UI.Seperate();
                         break;
 
                     // Si c'est le tour de l'adversaire
                     case BattleStates.ENEMYTURN:
-                        Engine.StartTurn();
+                        manager.Engine.StartTurn();
                         UI.Display("Tour de l'adversaire");
-                        TurnAction action = monster.DoTurn(berserker);
+                        TurnAction action = manager.Monster.DoTurn(manager.Character);
                         if(action != null)
                         {
-                            Engine.AppendAction(action);
+                            manager.Engine.AppendAction(action);
                         }
-                        Engine.DoTurn();
-                        Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
+                        manager.Engine.DoTurn();
+                        manager.Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
 
                         // Redonne 3 points d'action aux personnages participants à la bataille
                         AddActionsPoint(battleCharacters);
 
-                        state = BattleStates.PLAYERTURN;
+                        if (manager.state != BattleStates.LOSE && manager.state != BattleStates.WIN)
+                        {
+                            manager.state = BattleStates.PLAYERTURN;
+                        }
                         break;
 
                     // Si le joueur a gagné la bataille

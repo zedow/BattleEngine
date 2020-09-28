@@ -26,9 +26,15 @@ namespace BattleEngine
     }
     class Program
     {
+        static void AddActionsPoint(List<Character> characters)
+        {
+            UI.Display("3 points d'action rendus aux personnages, tour suivant");
+            UI.Seperate();
+            characters.ForEach(i => i.ActionPoints = Math.Min(i.ActionPoints + 3, i.MaxActionPoints));
+        }
         static void Main(string[] args)
         {
-            // Déclaration du Battle Engine
+            // Déclaration du Battle Engine et des personnages joueurs
             BattleEngine Engine = new BattleEngine();
             BattleStatesManager manager = new BattleStatesManager();
 
@@ -39,24 +45,30 @@ namespace BattleEngine
             {
                 Name = "Geralt of Rivia",
                 HP = 100f,
+                CurrentHP = 100f,
                 ActionPoints = 8,
+                MaxActionPoints = 8,
             };
-            berserker.Observe(manager);
 
             Foe monster = new Foe
             {
                 Name = "Noyeur",
                 HP = 35f,
-                ActionPoints = 8
+                CurrentHP = 35f,
+                ActionPoints = 8,
+                MaxActionPoints = 8,
             };
-            monster.Observe(manager);
-
+       
             battleCharacters.Add(berserker);
             battleCharacters.Add(monster);
+            battleCharacters.ForEach(i => i.Observe(manager));
 
-            // Mise en place d'une compétence de test
-            Ability ability1 = new Ability(3, -15f,"Fendoir","Coup d'épée infligeant une terrible blessure");
-            berserker.Abilities.Add(ability1);
+            // Mise en place des compétences utilisables
+            Ability ability1 = new Ability(2, -10f, "Griffure", "Coup de griffes acérées perforant les armures");
+            Ability ability2 = new Ability(3, -15f,"Fendoir","Coup d'épée infligeant une terrible blessure");
+            Ability ability3 = new Ability(5, -25f, "Tourbillon", "Le tourbillon est une technique mortelle de combat");
+            berserker.Abilities.Add(ability2);
+            berserker.Abilities.Add(ability3);
             monster.Abilities.Add(ability1);
 
             // Booléan définissant si la bataille est en cours ou terminée
@@ -77,8 +89,8 @@ namespace BattleEngine
                     // Si c'est le tour du joueur
                     case BattleStates.PLAYERTURN:
                         Engine.StartTurn(); 
-                        battleCharacters.ForEach(i => UI.Display($"{i.Name} : Points d'action  restant : {i.ActionPoints}, HP restant : {i.HP}"));
-
+                        battleCharacters.ForEach(i => UI.Display($"{i.Name} : Points d'action  restant : {i.ActionPoints}, HP restant : {i.CurrentHP} sur { i.HP }"));
+                        UI.Seperate();
                         // Choix de l'action à effectuer pour le joueur
                         UI.Display("Quelle action voulez-vous effectuer ?");
                         UI.Display("Appuyez sur A pour attaquer, Q pour abandonner et P pour passer votre tour");
@@ -170,6 +182,8 @@ namespace BattleEngine
                         }
                         Engine.DoTurn();
                         Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
+
+                        UI.Seperate();
                         break;
 
                     // Si c'est le tour de l'adversaire
@@ -183,6 +197,10 @@ namespace BattleEngine
                         }
                         Engine.DoTurn();
                         Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
+
+                        // Redonne 3 points d'action aux personnages participants à la bataille
+                        AddActionsPoint(battleCharacters);
+
                         state = BattleStates.PLAYERTURN;
                         break;
 

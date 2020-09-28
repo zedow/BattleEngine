@@ -11,5 +11,12 @@ namespace BattleEngine
         {
             Console.WriteLine(message);
         }
+
+        public static void Seperate()
+        {
+            Console.WriteLine("");
+            Console.WriteLine("---------------------------------------------------");
+            Console.WriteLine("");
+        }
     }
 }

@@ -8,6 +8,7 @@ namespace BattleEngine
     {
         public string Name;
         public float HP;
+        public float CurrentHP;
         public int ActionPoints;
         public int MaxActionPoints;
 

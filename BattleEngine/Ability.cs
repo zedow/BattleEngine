@@ -36,7 +36,7 @@ namespace BattleEngine
             results.Add(new ActionResult($"{source.Name} a perdu {this.ActionPoint} points d'action, {source.ActionPoints - this.ActionPoint} points d'action restant"));
 
             // Opération à effectuer sur la cible
-            target.HP += this.Value;
+            target.CurrentHP = this.Value > 0f ? Math.Min(target.CurrentHP + this.Value, target.HP) : Math.Max(target.CurrentHP + this.Value,0);
             target.Notify();
             source.ActionPoints -= this.ActionPoint;
             

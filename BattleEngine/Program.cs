@@ -74,7 +74,7 @@ namespace BattleEngine
             List<Ability> gameAbilities = new List<Ability>
             {
                 new Ability(2, -10f, "Griffure", "Coup de griffes acérées perforant les armures", 0),
-                new Ability(3, -50f, "Fendoir", "Coup d'épée infligeant une terrible blessure", 0),
+                new Ability(3, -15f, "Fendoir", "Coup d'épée infligeant une terrible blessure", 0),
                 new Ability(8, -30f, "Hachoir", "Coup d'épée infligeant une terrible blessure", 3),
                 new Ability(5, -25f, "Tourbillon", "Le tourbillon est une technique mortelle de combat", 2),
                 new Ability(4,-19f,"Coup circulaire","Terrible coup de faux circulaire",1),
@@ -164,50 +164,18 @@ namespace BattleEngine
                                 }
 
                                 // Initialisation de l'index à 99 (signifiant que l'index est dans l'attente de recevoir une valeur)
-                                int ability_index = 99;
+                                int ability_index = -1;
 
-                                // Demande à l'utilisateur d'indiquer l'index de la compétence à utiliser tant qu'il n'est pas renseigné ou tant que l'index renseigné est incorrect
-                                while (ability_index >= manager.Character.Abilities.Count && ability_index != 100)
+                                while (ability_index == -1)
                                 {
-                                    switch (ability_index)
+                                    ability_index = UI.CheckIndexInput(manager.Character.Abilities);
+                                    if (manager.Character.Abilities.ElementAt(ability_index).Cooldown != 0 && manager.Character.Abilities.ElementAt(ability_index).ActionPoint > manager.Character.ActionPoints)
                                     {
-                                        case 99:
-                                            UI.Display("Veuillez renseigner le numéro de la compétence à utiliser (entrez 100 pour passer le tour)");
-                                            break;
-                                        case 98:
-                                            UI.Display("Index incorrect, Veuillez réessayer (entrez 100 pour passer le tour)");
-                                            break;
-                                        case 97:
-                                            UI.Display("Points d'action insuffisants pour utiliser cette compétence (entrez 100 pour passer le tour)");
-                                            break;
-                                        case 96:
-                                            UI.Display("Compétence inutilisable (entrez 100 pour passer le tour)");
-                                            break;
-                                    }
-                                    string input = Console.ReadLine();
-                                    try
-                                    {
-                                        ability_index = Math.Abs(Int32.Parse(input));
-                                        if (manager.Character.Abilities.ElementAt(ability_index).ActionPoint > manager.Character.ActionPoints && ability_index != 100)
-                                        {
-                                            // Initialisation de l'index à 97 (signifiant que la compétence choisie n'est pas réalisable)
-                                            ability_index = 97;
-                                        }
-                                        else if (manager.Character.Abilities.ElementAt(ability_index).currentCooldown != 0)
-                                        {
-                                            // Initialisation de l'index à 96 (signifiant que la compétence choisie est en cooldown)
-                                            ability_index = 96;
-                                        }
-                                    }
-                                    catch
-                                    {
-                                        // Initialisation de l'index à 98 (signifiant que l'index choisi n'est pas valide)
-                                        if (ability_index != 100)
-                                        {
-                                            ability_index = 98;
-                                        }
+                                        ability_index = -1;
+                                        UI.Display("Compétence inutilisable");
                                     }
                                 }
+
                                 if (ability_index != 100)
                                 {
                                     UI.Display("Veuillez renseigner l'index de votre cible parmi les adversaires suivant :");

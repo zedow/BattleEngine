@@ -3,6 +3,6 @@ Projet éducatif dont le but est de développer un système de bataille en tour 
 
 Les fonctionnalités attendues :
 L'utilisateur peut définir l'action à effectuer (utiliser une compétence, abandonner le combat, passer son tour)
-L'utilisateur peut choisir une compétence parmis une liste de compétence
+L'utilisateur peut choisir une compétence parmi une liste de compétence
 L'utilisateur peut gagner ou perdre combat
 Le personnage de l'utilisateur peut être attaqué par l'adversaire

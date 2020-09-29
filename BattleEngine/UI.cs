@@ -18,5 +18,32 @@ namespace BattleEngine
             Console.WriteLine("---------------------------------------------------");
             Console.WriteLine("");
         }
+
+        public static int CheckIndexInput<T>(List<T> list) 
+        {
+            int index = 99;
+            bool goodIndex = false;
+            while (!goodIndex && index != 100)
+            {
+                string input = Console.ReadLine();
+                try
+                {
+                    index = Int32.Parse(input);
+                    if(index >= list.Count || index < 0)
+                    {
+                        UI.Display("Index incorrect, Veuillez réessayer (entrez 100 pour passer le tour)");
+                    }
+                    else
+                    {
+                        goodIndex = true;
+                    }
+                }
+                catch
+                {
+                    index = 99;
+                }
+            }
+            return index;
+        }
     }
 }

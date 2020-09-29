@@ -21,12 +21,20 @@ namespace BattleEngine
     {
         public BattleStates state;
         public PartyCharacter Character;
-        public Foe Monster;
+        public List<Foe> Opponents;
 
         public BattleEngine Engine = new BattleEngine();
+
+        public BattleManager()
+        {
+            Opponents = new List<Foe>();
+        }
         public List<Character> BattleCharacters()
         {
-            return (new List<Character> { Character, Monster });
+            List<Character> list = new List<Character>();
+            list.AddRange(Opponents);
+            list.Add(Character);
+            return (list);
         }
         public void Update(MyObservable<Character> observed)
         {
@@ -39,7 +47,10 @@ namespace BattleEngine
                 }
                 else
                 {
-                    state = BattleStates.WIN;
+                    if(Opponents.Where(i => i.CurrentHP > 0).ToList().Count == 0)
+                    {
+                        state = BattleStates.WIN;
+                    }
                 }
             }
         }
@@ -58,8 +69,18 @@ namespace BattleEngine
             BattleManager manager = new BattleManager();
             manager.state = BattleStates.START;
 
-            List<Character> battleCharacters = new List<Character>();
 
+            // Mise en place des compétences utilisables
+            List<Ability> gameAbilities = new List<Ability>
+            {
+                new Ability(2, -10f, "Griffure", "Coup de griffes acérées perforant les armures", 0),
+                new Ability(3, -50f, "Fendoir", "Coup d'épée infligeant une terrible blessure", 0),
+                new Ability(8, -30f, "Hachoir", "Coup d'épée infligeant une terrible blessure", 3),
+                new Ability(5, -25f, "Tourbillon", "Le tourbillon est une technique mortelle de combat", 2),
+                new Ability(4,-19f,"Coup circulaire","Terrible coup de faux circulaire",1),
+            };
+
+            // Mise en place du personnage jouable
             manager.Character = new PartyCharacter
             {
                 Name = "Geralt of Rivia",
@@ -67,29 +88,37 @@ namespace BattleEngine
                 CurrentHP = 100f,
                 ActionPoints = 8,
                 MaxActionPoints = 8,
+                Abilities = new List<Ability> { gameAbilities.ElementAt(1), gameAbilities.ElementAt(3) },
             };
 
-            manager.Monster = new Foe
+            // Mise en place des monstres que le joueur peut combattre
+            List<Foe> monsters = new List<Foe>
             {
-                Name = "Noyeur",
-                HP = 35f,
-                CurrentHP = 35f,
-                ActionPoints = 8,
-                MaxActionPoints = 8,
+                new Foe
+                {
+                    Name = "Noyeur",
+                    HP = 35f,
+                    CurrentHP = 35f,
+                    ActionPoints = 8,
+                    MaxActionPoints = 8,
+                    Abilities = new List<Ability> { gameAbilities.ElementAt(0), gameAbilities.ElementAt(2) },
+                },
+                new Foe
+                {
+                    Name = "Spectre",
+                    HP = 50f,
+                    CurrentHP = 50f,
+                    ActionPoints = 8,
+                    MaxActionPoints = 8,
+                    Abilities = new List<Ability> { gameAbilities.ElementAt(4) },
+                }
             };
 
+            // Ajout des monstres à la bataille
+            manager.Opponents.AddRange(new List<Foe> { monsters.ElementAt(0), monsters.ElementAt(1) });
+
+            // Initialisation de l'observation des personnages par le StateManager
             manager.BattleCharacters().ForEach(i => i.Observe(manager));
-
-            // Mise en place des compétences utilisables
-            Ability ability1 = new Ability(2, -10f, "Griffure", "Coup de griffes acérées perforant les armures",0);
-            Ability ability2 = new Ability(3, -15f,"Fendoir","Coup d'épée infligeant une terrible blessure",0);
-            Ability ability4 = new Ability(8, -30f, "Hachoir", "Coup d'épée infligeant une terrible blessure", 0);
-            Ability ability3 = new Ability(5, -25f, "Tourbillon", "Le tourbillon est une technique mortelle de combat",2);
-            manager.Character.Abilities.Add(ability2);
-            manager.Character.Abilities.Add(ability3);
-
-            manager.Monster.Abilities.Add(ability1);
-            manager.Monster.Abilities.Add(ability4);
 
             // Booléan définissant si la bataille est en cours ou terminée
             bool battle = true;
@@ -108,8 +137,8 @@ namespace BattleEngine
 
                     // Si c'est le tour du joueur
                     case BattleStates.PLAYERTURN:
-                        manager.Engine.StartTurn(); 
-                        battleCharacters.ForEach(i => UI.Display($"{i.Name} : Points d'action  restant : {i.ActionPoints}, HP restant : {i.CurrentHP} sur { i.HP }"));
+                        manager.Engine.StartTurn();
+                        manager.BattleCharacters().ForEach(i => UI.Display($"{i.Name} : Points d'action  restant : {i.ActionPoints}, HP restant : {i.CurrentHP} sur { i.HP }"));
                         UI.Seperate();
                         // Choix de l'action à effectuer pour le joueur
                         UI.Display("Quelle action voulez-vous effectuer ?");
@@ -117,7 +146,7 @@ namespace BattleEngine
 
                         // Demande à l'utilisateur d'entrer une valeur tant que a valeur ne correspond pas à une option possible
                         string value = Console.ReadLine();
-                        while(value != "A" && value != "Q" && value != "P")
+                        while (value != "A" && value != "Q" && value != "P")
                         {
                             UI.Display("Veuillez indiquer une valeur valide");
                             value = Console.ReadLine();
@@ -132,15 +161,15 @@ namespace BattleEngine
                                 for (int i = 0; i < manager.Character.Abilities.Count; i++)
                                 {
                                     UI.Display($"{i} : {manager.Character.Abilities.ElementAt(i).Name} | Coûte {manager.Character.Abilities.ElementAt(i).ActionPoint} points d'action | Délai avant réutilisation {manager.Character.Abilities.ElementAt(i).currentCooldown} tours");
-                                }   
-                                
+                                }
+
                                 // Initialisation de l'index à 99 (signifiant que l'index est dans l'attente de recevoir une valeur)
                                 int ability_index = 99;
 
                                 // Demande à l'utilisateur d'indiquer l'index de la compétence à utiliser tant qu'il n'est pas renseigné ou tant que l'index renseigné est incorrect
-                                while(ability_index >= manager.Character.Abilities.Count && ability_index != 100)
+                                while (ability_index >= manager.Character.Abilities.Count && ability_index != 100)
                                 {
-                                    switch(ability_index)
+                                    switch (ability_index)
                                     {
                                         case 99:
                                             UI.Display("Veuillez renseigner le numéro de la compétence à utiliser (entrez 100 pour passer le tour)");
@@ -164,7 +193,7 @@ namespace BattleEngine
                                             // Initialisation de l'index à 97 (signifiant que la compétence choisie n'est pas réalisable)
                                             ability_index = 97;
                                         }
-                                        else if(manager.Character.Abilities.ElementAt(ability_index).currentCooldown != 0)
+                                        else if (manager.Character.Abilities.ElementAt(ability_index).currentCooldown != 0)
                                         {
                                             // Initialisation de l'index à 96 (signifiant que la compétence choisie est en cooldown)
                                             ability_index = 96;
@@ -173,24 +202,51 @@ namespace BattleEngine
                                     catch
                                     {
                                         // Initialisation de l'index à 98 (signifiant que l'index choisi n'est pas valide)
-                                        if(ability_index != 100)
+                                        if (ability_index != 100)
                                         {
                                             ability_index = 98;
                                         }
                                     }
                                 }
-                                if(ability_index != 100)
+                                if (ability_index != 100)
                                 {
-                                    // Ajoute l'action de la compétence à utiliser aux actions du tour sur l'Engine
-                                    TurnAction currentAction = new TurnAction
+                                    UI.Display("Veuillez renseigner l'index de votre cible parmi les adversaires suivant :");
+                                    for (int i = 0; i < manager.Opponents.Count; i++)
                                     {
-                                        Action = manager.Character.Abilities.ElementAt(ability_index).DoAbility,
-                                        Source = manager.Character,
-                                        Target = manager.Monster,
-                                        ActionName = $"Utilise le sort {manager.Character.Abilities.ElementAt(ability_index).Name}"
-                                    };
-                                    manager.Engine.AppendAction(currentAction);
-                          
+                                        UI.Display($"{i} : {manager.Opponents.ElementAt(i).Name} / {manager.Opponents.ElementAt(i).CurrentHP} Hp restants");
+                                    }
+
+                                    // Fonction permettant de choisir une cible, tant que la cible choisie est hors combat, la demande recommence
+                                    int target = -1;
+                                    while (target == -1)
+                                    {
+                                        target = UI.CheckIndexInput<Foe>(manager.Opponents);
+                                        if (manager.Opponents.ElementAt(target).CurrentHP == 0)
+                                        {
+                                            target = -1;
+                                            UI.Display("Veuillez choisir une autre cible");
+                                        }
+                                    }
+
+                                    // Si l'index de la cible choisie est 100, l'utilisateur souhaite passer son tour
+                                    if (target == 100)
+                                    {
+                                        UI.Display("Vous passez votre tour");
+                                    }
+                                    else
+                                    {
+                                        // Ajoute l'action de la compétence à utiliser aux actions du tour sur l'Engine
+                                        TurnAction currentAction = new TurnAction
+                                        {
+                                            Action = manager.Character.Abilities.ElementAt(ability_index).DoAbility,
+                                            Source = manager.Character,
+                                            Target = manager.Opponents.ElementAt(target),
+                                            ActionName = $"Utilise le sort {manager.Character.Abilities.ElementAt(ability_index).Name}"
+                                        };
+                                        manager.Engine.AppendAction(currentAction);
+                                    }
+
+
                                 }
                                 else
                                 {
@@ -219,15 +275,21 @@ namespace BattleEngine
                     case BattleStates.ENEMYTURN:
                         manager.Engine.StartTurn();
                         UI.Display("Tour de l'adversaire");
-                        TurnAction action = manager.Monster.DoTurn(manager.Character);
-                        if(action != null)
+                        List<TurnAction> actions = new List<TurnAction>();
+                        manager.Opponents.ForEach(i => actions.Add(i.DoTurn(manager.Character)));
+                            
+                        foreach(TurnAction action in actions)
                         {
-                            manager.Engine.AppendAction(action);
+                            if(action != null)
+                            {
+                                manager.Engine.AppendAction(action);
+                            }
                         }
+
                         manager.Engine.DoTurn();
                         manager.Engine.GetTurnResults().ToList().ForEach(i => UI.Display(i.DisplayText));
 
-                        manager.Monster.Abilities.ForEach(i => i.ReduceCd());
+                        manager.Opponents.ForEach(i => i.Abilities.ForEach(a => a.ReduceCd()));
 
                         // Redonne 3 points d'action aux personnages participants à la bataille
                         AddActionsPoint(manager.BattleCharacters());
